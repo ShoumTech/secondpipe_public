@@ -5,6 +5,6 @@ files:
     destination: /home/ec2-user/    
 hooks:
   AfterInstall:
-    - location: scripts/pull_and_run_docker.sh > /tmp/chk.log 2>&1
+    - location: scripts/pull_and_run_docker.sh
       timeout: 60
       runas: ec2-user
