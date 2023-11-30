@@ -11,6 +11,6 @@ public class HomeController {
 	@ResponseBody
 	@GetMapping("/home")
 	public String getHomePage() {
-		return "<h1 style='color:green;'>Hi Welcome to ci/cd...</h1>";
+		return "<h1 style='color:red;'>Hi Welcome to ci/cd...</h1>";
 	}
 }
