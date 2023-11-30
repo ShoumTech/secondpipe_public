@@ -1,0 +1,59 @@
+name: public test
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+     
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+
+      - name: Build JAR
+        run: mvn -B clean install
+        
+      - name: Build Docker Image
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/testpipe_v1:latest .
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push to Docker Hub
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/testpipe_v1:latest
+
+#  deploy:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#
+#      # Step 1
+#      - name: Checkout to repo
+#        uses: actions/checkout@v3
+#  
+        # Step 2
+      - name: Set AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_ACCESS_TOKEN }}
+          aws-region: us-east-1
+  
+        # Step 3
+      - name: Create CodeDeploy Deployment
+        id: deploy
+        run: |
+          aws deploy create-deployment \
+          --application-name TEST_PIPE2 \
+          --deployment-group-name TEST_PIPE2_CICD \
+          --deployment-config-name CodeDeployDefault.OneAtATime \
+          --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
